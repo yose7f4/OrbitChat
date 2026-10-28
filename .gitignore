@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Local Database & Transcripts
+*.db
+*.db-journal
+*.db-wal
+
+# Binaries & Temporary files
+cloudflared.exe
+tmp-chrome/
+*.log
+.DS_Store
+
+# Environment
+.env

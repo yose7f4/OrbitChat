@@ -1,0 +1,13 @@
+{
+  "name": "chatapp",
+  "version": "1.0.0",
+  "description": "Fast real-time chat application with permanent username reservation and SQLite persistence",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}

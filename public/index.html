@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0B0B0C">
+  <meta name="color-scheme" content="dark">
+  <title>OrbitChat</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' stroke='%23EDEDEF' stroke-width='1.5' fill='none' stroke-dasharray='38 8'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%23C6FF3D'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- BACKGROUND GRAIN OVERLAY -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+
+  <!-- AUTH / JOIN SCREEN -->
+  <div id="auth-modal" class="auth-viewport">
+    <div class="auth-panel">
+      <div class="auth-header">
+        <div class="orbit-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none">
+            <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="1.25" stroke-dasharray="52 14" opacity="0.65" />
+            <circle cx="16" cy="16" r="3.5" fill="var(--accent)" />
+          </svg>
+        </div>
+        <div class="auth-title-group">
+          <h1>OrbitChat</h1>
+          <p class="auth-desc">Quiet real-time broadcast. Unregistered, persistent username.</p>
+        </div>
+      </div>
+
+      <form id="auth-form" class="auth-form" onsubmit="return false;">
+        <div class="field-block">
+          <div class="field-label-row">
+            <label for="username-input">Handle</label>
+            <span class="char-count font-mono"><span id="char-num">0</span>/20</span>
+          </div>
+          <div class="input-wrap">
+            <input 
+              type="text" 
+              id="username-input" 
+              placeholder="e.g. kuro, zero, 0x1a" 
+              minlength="1" 
+              maxlength="20" 
+              required 
+              autocomplete="off" 
+              autofocus 
+              spellcheck="false"
+            >
+          </div>
+        </div>
+
+        <div id="key-input-container" class="field-block key-container collapsed">
+          <label for="private-key-input">Private Key</label>
+          <div class="input-wrap">
+            <input 
+              type="text" 
+              id="private-key-input" 
+              placeholder="key_xxxxxxxxxxxxxxxxxxxxxxxx" 
+              autocomplete="off" 
+              spellcheck="false"
+              class="font-mono text-sm"
+            >
+          </div>
+          <span class="field-hint font-mono">Paste the key assigned to this handle on your other device.</span>
+        </div>
+
+        <div id="auth-error" class="auth-alert font-mono hidden"></div>
+
+        <div class="auth-actions">
+          <button type="submit" id="claim-btn" class="btn-join">
+            <span>Join</span>
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </button>
+          <button type="button" id="toggle-key-btn" class="btn-text-toggle font-mono">
+            Have a private key?
+          </button>
+        </div>
+      </form>
+
+      <div class="auth-footer font-mono">
+        <span>STRICT MATCH</span>
+        <span>•</span>
+        <span>DEVICE BOUND</span>
+        <span>•</span>
+        <span>SQLITE BACKED</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CHAT APPLICATION -->
+  <div id="app" class="app-viewport hidden">
+    <!-- APP HEADER -->
+    <header class="app-header">
+      <div class="header-brand">
+        <svg class="brand-orbit" viewBox="0 0 24 24" width="18" height="18" fill="none">
+          <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.25" stroke-dasharray="38 10" opacity="0.6" />
+          <circle cx="12" cy="12" r="2.5" fill="var(--accent)" />
+        </svg>
+        <span class="brand-name">OrbitChat</span>
+      </div>
+
+      <div class="header-status font-mono">
+        <span class="status-indicator live" id="conn-indicator"></span>
+        <span class="status-text text-xs" id="conn-status">CONNECTED</span>
+      </div>
+
+      <div class="header-controls">
+        <button id="toggle-sound-btn" class="btn-icon" title="Toggle audio chime" aria-label="Toggle audio">
+          <svg id="sound-icon-on" viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2.5 6h2.5l4-3.5v11l-4-3.5H2.5v-4zM11.5 5.5a3.5 3.5 0 010 5M13.5 3.5a6.5 6.5 0 010 9"/>
+          </svg>
+          <svg id="sound-icon-off" class="hidden" viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2.5 6h2.5l4-3.5v11l-4-3.5H2.5v-4zM11.5 6.5l3 3M14.5 6.5l-3 3"/>
+          </svg>
+        </button>
+
+        <button id="show-key-btn" class="btn-icon" title="View private key" aria-label="View private key">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="5.5" cy="8" r="3"/>
+            <path d="M8.5 8H14v2.5h-2v1.5H10v-1.5H8.5"/>
+          </svg>
+        </button>
+
+        <button id="logout-btn" class="btn-icon" title="Release handle from this browser" aria-label="Switch identity">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M6 3H3v10h3M10 5l3 3-3 3M13 8H6"/>
+          </svg>
+        </button>
+
+        <button id="toggle-users-btn" class="btn-users font-mono" aria-label="Toggle user list">
+          <span class="user-status-dot"></span>
+          <span id="online-count">1</span>
+          <span class="label-desktop">ONLINE</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CHAT WORKSPACE -->
+    <div class="workspace-layout">
+      <!-- MAIN STREAM -->
+      <main class="chat-column">
+        <!-- SCROLLABLE LOG -->
+        <div class="log-viewport" id="messages-container" tabindex="0">
+          <div class="history-start" id="history-start">
+            <div class="orbit-arc-symbol" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
+                <circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="1" stroke-dasharray="16 8" opacity="0.3" />
+                <circle cx="16" cy="16" r="2" fill="currentColor" opacity="0.4" />
+              </svg>
+            </div>
+            <p class="font-mono text-xs text-muted">OrbitChat transcript started. Scrollback stored locally in SQLite.</p>
+          </div>
+
+          <div id="messages-list" class="messages-flow"></div>
+
+          <div id="empty-state" class="empty-log font-mono hidden">
+            <span>Quiet in here.</span>
+          </div>
+        </div>
+
+        <!-- NEW MESSAGES FLOATING PILL -->
+        <button id="scroll-bottom-pill" class="pill-scroll font-mono hidden">
+          <span>New messages</span>
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 6.5l5 5 5-5"/>
+          </svg>
+        </button>
+
+        <!-- TYPING LOG -->
+        <div id="typing-indicator" class="typing-bar font-mono hidden">
+          <span class="typing-name" id="typing-text">someone is typing</span>
+          <span class="terminal-cursor" aria-hidden="true">▋</span>
+        </div>
+
+        <!-- COMPOSER -->
+        <footer class="composer-dock">
+          <form id="chat-form" class="composer-form" onsubmit="return false;">
+            <div class="composer-input-row">
+              <textarea 
+                id="message-input" 
+                rows="1" 
+                placeholder="Message transcript..." 
+                maxlength="1000" 
+                autocomplete="off"
+                spellcheck="true"
+              ></textarea>
+              <button type="submit" id="send-btn" class="btn-send" title="Send message (Enter)" aria-label="Send">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75">
+                  <path d="M13.5 2.5l-11 5.5 4.5 1.5 1.5 4.5 5-11.5z"/>
+                </svg>
+              </button>
+            </div>
+            <div class="composer-meta font-mono">
+              <span class="composer-hint">Enter to send · Shift+Enter for newline</span>
+              <span class="composer-handle font-mono" id="current-username-badge">@anon</span>
+            </div>
+          </form>
+        </footer>
+      </main>
+
+      <!-- ACTIVE USERS SIDEBAR -->
+      <aside class="users-sidebar" id="sidebar">
+        <div class="sidebar-header font-mono">
+          <span class="sidebar-title">ONLINE (<span id="sidebar-online-count">0</span>)</span>
+          <button id="close-sidebar-btn" class="btn-icon-subtle mobile-close" aria-label="Close user drawer">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 4l8 8M12 4L4 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="users-list" id="users-list"></div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- PRIVATE KEY MODAL -->
+  <div id="key-modal" class="modal-layer hidden">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="key-modal-title">
+      <div class="modal-head">
+        <div class="modal-icon">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="5.5" cy="8" r="3"/>
+            <path d="M8.5 8H14v2.5h-2v1.5H10v-1.5H8.5"/>
+          </svg>
+        </div>
+        <div>
+          <h2 id="key-modal-title">Private Key</h2>
+          <p class="modal-subtitle font-mono text-xs">Device credential for <strong id="modal-username"></strong></p>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <div class="key-card">
+          <code id="modal-key-text" class="font-mono">key_...</code>
+          <button id="copy-key-btn" class="btn-copy font-mono" title="Copy to clipboard">
+            <svg id="copy-icon" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="5" y="5" width="8" height="8" rx="1.5"/>
+              <path d="M3 11V3h8"/>
+            </svg>
+            <span id="copy-label">Copy</span>
+          </button>
+        </div>
+        <p class="key-warning font-mono text-xs">
+          Keep this secret. Anyone with this key can claim your handle on another browser or device.
+        </p>
+      </div>
+
+      <div class="modal-foot">
+        <button id="close-key-modal-btn" class="btn-secondary font-mono">Dismiss</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Socket.io client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Main application script -->
+  <script src="client.js"></script>
+</body>
+</html>
