@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { OrbitalHeroSection } from "@/components/ui/orbital-hero-section";
+import { BlackHoleHeroSection } from "@/components/ui/blackhole-hero-section";
 
 /** True while the viewport is narrow. Drives the layout swap below. */
 function useNarrow(query = "(max-width: 767px)") {
@@ -17,45 +17,48 @@ function useNarrow(query = "(max-width: 767px)") {
 }
 
 /**
- * A hero built around the background rather than laid on top of it.
+ * A hero built around the picture rather than laid on top of it.
  *
- * Three things keep the copy readable without dimming the picture:
+ * The hole is pushed off centre with `focus`, so the busy half and the reading
+ * half never overlap, and `scrim` darkens only the edge the copy sits on. A
+ * flat overlay could not do that without greying the halo as well.
  *
- * 1. The Sun is pushed off centre with `focus`, so the busy half and the
- *    reading half never overlap.
- * 2. `scrim` darkens the edge the text sits on and fades out before the coils,
- *    which a flat overlay could not do without greying the whole frame.
- * 3. The text block is capped in width, so a long line never runs into the art.
- *
- * On a narrow screen there is no room to put those halves side by side, so the
- * whole thing turns through 90°: art low, copy high, veil from the top.
+ * A phone has no room to stand the two side by side, so there the whole thing
+ * turns through 90°: hole low, copy high, veil from the top — and the ray
+ * count drops, because a phone pays for every step.
  */
-export default function OrbitalHeroSectionDemo() {
+export default function BlackHoleHeroSectionDemo() {
   const narrow = useNarrow();
 
   return (
     <section className="relative min-h-[92svh] w-full md:min-h-[720px]">
-      <OrbitalHeroSection
-        focus={narrow ? [0.5, 0.86] : [0.74, 0.42]}
+      <BlackHoleHeroSection
+        // A phone has no room to stand the art beside the copy, so the
+        // arrangement turns through 90°: copy at the top under a veil, the
+        // hole low and whole in the bottom third. Not pushed off the edge —
+        // half a hole reads as a mistake, and the empty middle it leaves reads
+        // as a bug. A wider field makes up the room the narrow frame lost.
+        focus={narrow ? [0.5, 0.76] : [0.72, 0.46]}
         scrim={narrow ? "top" : "left"}
-        scrimStrength={narrow ? 0.94 : 0.92}
-        viewRadius={narrow ? 2.1 : 3.1}
-        lead={narrow ? 0.05 : 0.12}
-        // A phone has no room to stand the art beside the copy: the text alone
-        // takes most of the screen. So there it drops back to a quiet texture.
-        glow={narrow ? 0.5 : 1}
+        scrimStrength={0.9}
+        distance={24}
+        elevation={narrow ? -7 : -5.5}
+        fov={narrow ? 58 : 42}
+        glow={narrow ? 0.85 : 1}
+        steps={narrow ? 200 : 300}
+        resolution={narrow ? 0.6 : 0.7}
       >
         <div className="flex h-full min-h-[92svh] items-start px-6 pt-14 sm:px-10 md:min-h-[720px] md:items-center md:pt-0 lg:px-20">
           <div className="max-w-[34rem]">
             <h1 className="text-[2.5rem] font-light leading-[1.05] tracking-[-0.03em] text-white sm:text-6xl lg:text-[4.25rem]">
-              Nothing here
+              Light does not
               <br />
-              stands still
+              leave here
             </h1>
 
             <p className="mt-6 max-w-md text-[0.95rem] leading-relaxed text-white/60 md:mt-7">
-              The Sun is running, and the planets chase it. Every track you see
-              is a helix.
+              The ring above the shadow is the far side of the disc, bent over
+              the top. Nothing put it there but gravity.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3 md:mt-10">
@@ -74,7 +77,7 @@ export default function OrbitalHeroSectionDemo() {
             </div>
           </div>
         </div>
-      </OrbitalHeroSection>
+      </BlackHoleHeroSection>
     </section>
   );
 }
