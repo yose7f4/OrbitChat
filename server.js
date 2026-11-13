@@ -19,13 +19,18 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // REST endpoint for initial claim & authentication check
-app.post('/api/auth', (req, res) => {
-  const { username, token } = req.body || {};
-  const result = claimOrAuthenticateUser(username, token);
-  if (!result.success) {
-    return res.status(400).json(result);
+app.post('/api/auth', async (req, res) => {
+  try {
+    const { username, token } = req.body || {};
+    const result = await claimOrAuthenticateUser(username, token);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    return res.json(result);
+  } catch (err) {
+    console.error('Auth error:', err);
+    return res.status(500).json({ success: false, error: 'Internal server error' });
   }
-  return res.json(result);
 });
 
 // Track active online users: Map<username, Set<socketId>>
@@ -39,48 +44,55 @@ io.on('connection', (socket) => {
   let currentUser = null;
 
   // Handle client authentication via socket
-  socket.on('auth:login', ({ username, token }) => {
-    const authResult = claimOrAuthenticateUser(username, token);
-    if (!authResult.success) {
-      return socket.emit('auth:error', { error: authResult.error });
-    }
+  socket.on('auth:login', async ({ username, token }) => {
+    try {
+      const authResult = await claimOrAuthenticateUser(username, token);
+      if (!authResult.success) {
+        return socket.emit('auth:error', { error: authResult.error });
+      }
 
-    currentUser = authResult.username;
-    socket.data.username = currentUser;
+      currentUser = authResult.username;
+      socket.data.username = currentUser;
 
-    // Register socket connection for presence
-    if (!userSockets.has(currentUser)) {
-      userSockets.set(currentUser, new Set());
-      // Announce new arrival to everyone else
-      socket.broadcast.emit('chat:system', {
-        text: `${currentUser} joined the chat.`,
-        timestamp: Date.now()
+      // Register socket connection for presence
+      if (!userSockets.has(currentUser)) {
+        userSockets.set(currentUser, new Set());
+        // Announce new arrival to everyone else
+        socket.broadcast.emit('chat:system', {
+          text: `${currentUser} joined the chat.`,
+          timestamp: Date.now()
+        });
+      }
+      userSockets.get(currentUser).add(socket.id);
+
+      const recentMessages = await getRecentMessages(100);
+
+      // Send success state back to authenticated client
+      socket.emit('auth:success', {
+        username: currentUser,
+        token: authResult.token,
+        isNew: authResult.isNew,
+        recentMessages,
+        onlineUsers: getOnlineUsernames()
       });
+
+      // Broadcast updated presence list
+      io.emit('presence:update', {
+        onlineUsers: getOnlineUsernames()
+      });
+    } catch (err) {
+      console.error('Socket auth error:', err);
+      socket.emit('auth:error', { error: 'Authentication failed due to server error.' });
     }
-    userSockets.get(currentUser).add(socket.id);
-
-    // Send success state back to authenticated client
-    socket.emit('auth:success', {
-      username: currentUser,
-      token: authResult.token,
-      isNew: authResult.isNew,
-      recentMessages: getRecentMessages(100),
-      onlineUsers: getOnlineUsernames()
-    });
-
-    // Broadcast updated presence list
-    io.emit('presence:update', {
-      onlineUsers: getOnlineUsernames()
-    });
   });
 
   // Handle incoming message
-  socket.on('chat:send', ({ text }) => {
+  socket.on('chat:send', async ({ text }) => {
     if (!currentUser) {
       return socket.emit('chat:error', { error: 'You are not logged in.' });
     }
 
-    const savedMsg = saveMessage(currentUser, text);
+    const savedMsg = await saveMessage(currentUser, text);
     if (savedMsg) {
       io.emit('chat:message', savedMsg);
     }
