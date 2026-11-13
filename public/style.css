@@ -52,14 +52,9 @@ body {
   position: relative;
 }
 
-/* 2-3% Subtle Grain Overlay */
+/* 2-3% Subtle Grain Overlay — disabled to remove blur/noise */
 .grain-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  display: none !important;
 }
 
 /* Text Selection */
@@ -132,9 +127,7 @@ input, textarea, button {
 .auth-viewport {
   position: fixed;
   inset: 0;
-  background-color: rgba(7, 7, 9, 0.45);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,11 +137,9 @@ input, textarea, button {
 }
 
 .auth-panel {
-  background-color: rgba(18, 18, 20, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  background-color: rgba(18, 18, 20, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
   border-radius: var(--radius-md);
   width: 100%;
   max-width: 380px;
@@ -317,9 +308,7 @@ input, textarea, button {
 .app-viewport {
   position: relative;
   z-index: 10;
-  background-color: rgba(11, 11, 12, 0.78);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background-color: transparent;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -328,8 +317,8 @@ input, textarea, button {
 
 .app-header {
   height: 48px;
-  background-color: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background-color: rgba(11, 11, 13, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -449,7 +438,7 @@ input, textarea, button {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  background-color: var(--bg);
+  background-color: transparent;
 }
 
 .log-viewport {
@@ -746,8 +735,8 @@ input, textarea, button {
    6. COMPOSER
    ========================================================================== */
 .composer-dock {
-  background-color: var(--surface);
-  border-top: 1px solid var(--border);
+  background-color: rgba(11, 11, 13, 0.75);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: 0.65rem 1rem max(0.65rem, env(safe-area-inset-bottom)) 1rem;
   flex-shrink: 0;
 }
@@ -832,8 +821,8 @@ input, textarea, button {
    ========================================================================== */
 .users-sidebar {
   width: 200px;
-  background-color: var(--surface);
-  border-left: 1px solid var(--border);
+  background-color: rgba(11, 11, 13, 0.75);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
