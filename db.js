@@ -61,7 +61,7 @@ async function claimOrAuthenticateUser(username, providedSecret = null) {
 
   if (supabase) {
     const { data: existing, error: fetchErr } = await supabase
-      .from('users')
+      .from('orbit_users')
       .select('username, secret_token, created_at')
       .eq('username', trimmed)
       .maybeSingle();
@@ -75,7 +75,7 @@ async function claimOrAuthenticateUser(username, providedSecret = null) {
       const secretToken = 'key_' + crypto.randomBytes(16).toString('hex');
       const now = Date.now();
       const { error: insertErr } = await supabase
-        .from('users')
+        .from('orbit_users')
         .insert({ username: trimmed, secret_token: secretToken, created_at: now });
 
       if (insertErr) {
@@ -155,7 +155,7 @@ async function saveMessage(username, text) {
 
   if (supabase) {
     const { data, error } = await supabase
-      .from('messages')
+      .from('orbit_messages')
       .insert({ username, text: cleanText, timestamp: now })
       .select('id, username, text, timestamp')
       .single();
@@ -188,7 +188,7 @@ async function saveMessage(username, text) {
 async function getRecentMessages(limit = 100) {
   if (supabase) {
     const { data, error } = await supabase
-      .from('messages')
+      .from('orbit_messages')
       .select('id, username, text, timestamp')
       .order('id', { ascending: false })
       .limit(limit);
