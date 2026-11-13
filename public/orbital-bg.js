@@ -1,4 +1,4 @@
-// Orbital Hero Background — Canvas Animation ported from orbital-hero-section
+// OrbitChat — High-Performance Rotating & Reactive Orbital Canvas Background
 (function() {
   'use strict';
 
@@ -9,14 +9,14 @@
   if (!ctx) return;
 
   const SOLAR_SYSTEM = [
-    { name: "Mercury", a: 0.38710, e: 0.20563, i: 7.005, node: 48.331, peri: 29.125, M0: 174.796, color: "#fff0d0", size: 2.2 },
-    { name: "Venus",   a: 0.72333, e: 0.00677, i: 3.395, node: 76.680, peri: 54.853, M0: 50.115,  color: "#ffc65a", size: 3.4 },
-    { name: "Earth",   a: 1.00000, e: 0.01671, i: 0.000, node: 348.739, peri: 114.208, M0: 357.517, color: "#5fd8ff", size: 3.8, glow: 1.1 },
-    { name: "Mars",    a: 1.52371, e: 0.09339, i: 1.850, node: 49.558, peri: 286.483, M0: 19.373, color: "#ff4a32", size: 2.9 },
-    { name: "Jupiter", a: 5.20290, e: 0.04839, i: 1.303, node: 100.464, peri: 273.867, M0: 20.020, color: "#ffa62e", size: 5.4 },
-    { name: "Saturn",  a: 9.53700, e: 0.05386, i: 2.485, node: 113.665, peri: 339.392, M0: 317.020, color: "#ffd884", size: 4.8 },
-    { name: "Uranus",  a: 19.1913, e: 0.04726, i: 0.773, node: 74.006, peri: 98.999, M0: 142.238, color: "#7fe6ff", size: 4.2 },
-    { name: "Neptune", a: 30.0690, e: 0.00859, i: 1.770, node: 131.784, peri: 276.336, M0: 256.228, color: "#3f7dff", size: 4.4 },
+    { name: "Mercury", a: 0.38710, e: 0.20563, i: 7.005, node: 48.331, peri: 29.125, M0: 174.796, color: "#fff0d0", size: 2.5, glow: 1.3 },
+    { name: "Venus",   a: 0.72333, e: 0.00677, i: 3.395, node: 76.680, peri: 54.853, M0: 50.115,  color: "#ffc65a", size: 3.8, glow: 1.2 },
+    { name: "Earth",   a: 1.00000, e: 0.01671, i: 0.000, node: 348.739, peri: 114.208, M0: 357.517, color: "#5fd8ff", size: 4.2, glow: 1.5 },
+    { name: "Mars",    a: 1.52371, e: 0.09339, i: 1.850, node: 49.558, peri: 286.483, M0: 19.373, color: "#ff4a32", size: 3.2, glow: 1.2 },
+    { name: "Jupiter", a: 5.20290, e: 0.04839, i: 1.303, node: 100.464, peri: 273.867, M0: 20.020, color: "#ffa62e", size: 5.8, glow: 1.3 },
+    { name: "Saturn",  a: 9.53700, e: 0.05386, i: 2.485, node: 113.665, peri: 339.392, M0: 317.020, color: "#ffd884", size: 5.2, glow: 1.2 },
+    { name: "Uranus",  a: 19.1913, e: 0.04726, i: 0.773, node: 74.006, peri: 98.999, M0: 142.238, color: "#7fe6ff", size: 4.5, glow: 1.1 },
+    { name: "Neptune", a: 30.0690, e: 0.00859, i: 1.770, node: 131.784, peri: 276.336, M0: 256.228, color: "#3f7dff", size: 4.6, glow: 1.1 },
   ];
 
   const PLANE_FAN = [
@@ -64,41 +64,36 @@
     };
   }
 
-  const reduced = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let width = 0;
   let height = 0;
   let dpr = 1;
-  let years = reduced ? 1.7 : 0;
+  let years = 0;
   let lastFrame = 0;
   let running = true;
-  let visible = true;
   let raf = 0;
 
+  // Active configuration: fast planetary motion, live continuous rotation, high glow
   const props = {
     planets: SOLAR_SYSTEM,
-    yearSeconds: 16,
-    trailYears: 2.8,
-    compress: 0.42,
-    maxTurns: 3,
-    planeSpread: 1,
-    eccentricity: 0.25,
+    yearSeconds: 6,       // Fast, lively planet speeds
+    trailYears: 3.2,      // Rich visible helical trails
+    compress: 0.44,       // Clear spread across screen
+    maxTurns: 3.5,
+    planeSpread: 0.9,
+    eccentricity: 0.28,
     alignToCourse: 1,
-    driftSpeed: 1.6,
+    driftSpeed: 1.8,
     apex: [272, 53],
-    viewRadius: 3.2,
-    tilt: 45,
-    spin: 252,
-    roll: 13.5,
-    lead: 0.12,
-    focus: [0.65, 0.45],
-    scrim: "none",
-    scrimStrength: 0.88,
+    viewRadius: 3.3,
+    tilt: 42,
+    spin: 240,
+    roll: 12,
+    lead: 0.10,
+    focus: [0.62, 0.46],  // Balanced position in open chat area
     starCount: 1600,
-    glow: 1.35,
-    showOrbits: false,
+    glow: 1.4,
+    showOrbits: true,     // Faint guide rings for Keplerian paths
     showSunTrack: true,
-    interactive: true,
-    paused: false,
     sunColor: "#FFF2CC"
   };
 
@@ -257,8 +252,8 @@
     let ox, oy;
     if (edge === 0) { ox = -halfW; oy = (rand() * 2 - 1) * halfH; }
     else if (edge === 1) { ox = halfW; oy = (rand() * 2 - 1) * halfH; }
-    else if (edge === 2) { ox = (rand() * 2 - 1) * halfW; oy = -halfH; }
-    else if (edge === 3) { ox = (rand() * 2 - 1) * halfW; oy = halfH; }
+    else if (edge === 2) { ox = (rand() * 2 - 1) * halfH; oy = -halfH; }
+    else if (edge === 3) { ox = (rand() * 2 - 1) * halfH; oy = halfH; }
     else { ox = (rand() * 2 - 1) * halfW; oy = (rand() * 2 - 1) * halfH; }
     const scale = d / (camDist * pxPerAU);
     const vx = ox * scale;
@@ -275,7 +270,7 @@
   }
 
   function buildStars() {
-    starN = Math.max(60, Math.round(props.starCount * Math.min(2, (width * height) / (1440 * 900))));
+    starN = Math.max(80, Math.round(props.starCount * Math.min(2, (width * height) / (1440 * 900))));
     sx = new Float64Array(starN);
     sy = new Float64Array(starN);
     sz = new Float64Array(starN);
@@ -298,8 +293,8 @@
     const grad = g2.createRadialGradient(R, R, 0, R, R, R);
     grad.addColorStop(0, "rgba(255,255,255,1)");
     grad.addColorStop(0.15, `rgba(${r},${g},${b},0.95)`);
-    grad.addColorStop(0.36, `rgba(${r},${g},${b},0.26)`);
-    grad.addColorStop(0.66, `rgba(${r},${g},${b},0.05)`);
+    grad.addColorStop(0.36, `rgba(${r},${g},${b},0.3)`);
+    grad.addColorStop(0.66, `rgba(${r},${g},${b},0.08)`);
     grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
     g2.fillStyle = grad;
     g2.fillRect(0, 0, R * 2, R * 2);
@@ -313,14 +308,12 @@
     D_NEAR = camDist * 5;
     D_FAR = camDist * 120;
     setApex(props.apex[0], props.apex[1]);
-    setCamera(props.spin, props.tilt, props.roll);
   }
 
   function resize() {
     const w = window.innerWidth;
     const h = window.innerHeight;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    if (w === width && h === height) return;
     width = w;
     height = h;
     canvas.width = Math.round(w * dpr);
@@ -330,44 +323,78 @@
     buildStars();
   }
 
-  let pointerX = 0, pointerY = 0, camX = 0, camY = 0;
+  // INTERACTIVE REACTION & CONTINUOUS ROTATION
+  let pointerX = 0, pointerY = 0;
+  let camX = 0, camY = 0;
+  let autoRotation = 0;        // Continuous auto-orbit spin
+  let dragSpinOffset = 0;      // Manual drag spin
+  let dragTiltOffset = 0;      // Manual drag tilt
+  let isDragging = false;
+  let dragStartX = 0, dragStartY = 0;
+
+  window.addEventListener("pointerdown", (ev) => {
+    // Only capture drag if clicking empty background space
+    if (['INPUT', 'TEXTAREA', 'BUTTON', 'A'].includes(ev.target.tagName)) return;
+    isDragging = true;
+    dragStartX = ev.clientX;
+    dragStartY = ev.clientY;
+  });
+
   window.addEventListener("pointermove", (ev) => {
     pointerX = (ev.clientX / window.innerWidth - 0.5) * 2;
     pointerY = (ev.clientY / window.innerHeight - 0.5) * 2;
+    if (isDragging) {
+      const dx = ev.clientX - dragStartX;
+      const dy = ev.clientY - dragStartY;
+      dragSpinOffset += dx * 0.5;
+      dragTiltOffset -= dy * 0.35;
+      dragStartX = ev.clientX;
+      dragStartY = ev.clientY;
+    }
   });
+
+  window.addEventListener("pointerup", () => { isDragging = false; });
+  window.addEventListener("pointercancel", () => { isDragging = false; });
+
+  // Optional wheel zoom
+  window.addEventListener("wheel", (ev) => {
+    if (['TEXTAREA', 'INPUT'].includes(document.activeElement?.tagName)) return;
+    props.viewRadius = Math.max(1.8, Math.min(5.5, props.viewRadius + (ev.deltaY > 0 ? 0.15 : -0.15)));
+    layout();
+  }, { passive: true });
 
   function drawSun(k, t) {
     const [r, g, b] = parseRGB(props.sunColor);
-    const pulse = 1 + Math.sin(t * 2.1) * 0.02;
-    const R = Math.max(5, Math.min(width, height) * 0.013) * pulse;
+    const pulse = 1 + Math.sin(t * 3.5) * 0.04;
+    const R = Math.max(6, Math.min(width, height) * 0.015) * pulse;
 
-    const haze = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 14);
-    haze.addColorStop(0, `rgba(${r},${g},${b},${0.05 * k})`);
-    haze.addColorStop(0.4, `rgba(255,190,110,${0.014 * k})`);
+    const haze = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 16);
+    haze.addColorStop(0, `rgba(${r},${g},${b},${0.08 * k})`);
+    haze.addColorStop(0.35, `rgba(255,190,110,${0.025 * k})`);
     haze.addColorStop(1, "rgba(255,160,80,0)");
     ctx.fillStyle = haze;
     ctx.beginPath();
-    ctx.arc(cx, cy, R * 14, 0, TAU);
+    ctx.arc(cx, cy, R * 16, 0, TAU);
     ctx.fill();
 
-    const outer = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 4.6);
-    outer.addColorStop(0, `rgba(${r},${g},${b},${0.34 * k})`);
-    outer.addColorStop(0.3, `rgba(255,222,160,${0.1 * k})`);
-    outer.addColorStop(0.62, `rgba(255,196,110,${0.025 * k})`);
+    const outer = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 5.2);
+    outer.addColorStop(0, `rgba(${r},${g},${b},${0.45 * k})`);
+    outer.addColorStop(0.3, `rgba(255,222,160,${0.18 * k})`);
+    outer.addColorStop(0.62, `rgba(255,196,110,${0.04 * k})`);
     outer.addColorStop(1, "rgba(255,180,90,0)");
     ctx.fillStyle = outer;
     ctx.beginPath();
-    ctx.arc(cx, cy, R * 4.6, 0, TAU);
+    ctx.arc(cx, cy, R * 5.2, 0, TAU);
     ctx.fill();
 
-    const bloom = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 2.3);
+    const bloom = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 2.5);
     bloom.addColorStop(0, `rgba(255,255,255,${k})`);
-    bloom.addColorStop(0.42, `rgba(255,252,240,${0.7 * k})`);
-    bloom.addColorStop(0.72, `rgba(${r},${g},${b},${0.22 * k})`);
+    bloom.addColorStop(0.42, `rgba(255,252,240,${0.85 * k})`);
+    bloom.addColorStop(0.72, `rgba(${r},${g},${b},${0.3 * k})`);
     bloom.addColorStop(1, "rgba(255,210,140,0)");
     ctx.fillStyle = bloom;
     ctx.beginPath();
-    ctx.arc(cx, cy, R * 2.3, 0, TAU);
+    ctx.arc(cx, cy, R * 2.5, 0, TAU);
     ctx.fill();
 
     ctx.fillStyle = "rgba(255,255,255,1)";
@@ -381,9 +408,15 @@
     layout();
     syncElements();
 
-    camX += (pointerX - camX) * 0.04;
-    camY += (pointerY - camY) * 0.04;
-    setCamera(props.spin + camX * 7, props.tilt + camY * 5, props.roll);
+    // Smoothly ease camera to cursor + user drag offset
+    camX += (pointerX - camX) * 0.06;
+    camY += (pointerY - camY) * 0.06;
+
+    // ACTIVE ROTATION: continuous dynamic celestial orbit + mouse reaction
+    const currentSpin = (props.spin + autoRotation + dragSpinOffset + camX * 45) % 360;
+    const currentTilt = Math.max(12, Math.min(80, props.tilt + dragTiltOffset + camY * 28));
+
+    setCamera(currentSpin, currentTilt, props.roll);
 
     dist = props.driftSpeed * t;
     cx = width * props.focus[0];
@@ -400,11 +433,11 @@
     }
 
     ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = "#070709";
+    ctx.fillStyle = "#060608";
     ctx.fillRect(0, 0, width, height);
     ctx.globalCompositeOperation = "lighter";
 
-    // Stars
+    // 1. Stars field with parallax
     const dRef = D_NEAR * 3.3;
     const left = -width * 0.12;
     const right = width * 1.12;
@@ -421,11 +454,11 @@
 
       const near = Math.min(1, (P.depth - D_NEAR * 0.75) / (D_NEAR * 0.6));
       const far = 1 - Math.max(0, (P.depth - D_FAR * 0.78) / (D_FAR * 0.32));
-      let a = (0.2 + sMag[s] * 1.05) * Math.pow(dRef / P.depth, 0.8) * near * far;
-      if (a <= 0.012) continue;
-      a *= 0.82 + 0.18 * Math.sin(t * 9 + sPhase[s]);
-      const col = sTint[s] === 1 ? "175,205,255" : sTint[s] === 2 ? "255,214,170" : "255,255,255";
-      const size = Math.min(2.3, 0.55 + sMag[s] * 1.5 * Math.pow(dRef / P.depth, 0.5));
+      let a = (0.25 + sMag[s] * 1.1) * Math.pow(dRef / P.depth, 0.8) * near * far;
+      if (a <= 0.01) continue;
+      a *= 0.85 + 0.15 * Math.sin(t * 12 + sPhase[s]);
+      const col = sTint[s] === 1 ? "180,210,255" : sTint[s] === 2 ? "255,220,180" : "255,255,255";
+      const size = Math.min(2.5, 0.6 + sMag[s] * 1.6 * Math.pow(dRef / P.depth, 0.5));
       ctx.fillStyle = `rgba(${col},${Math.min(1, a).toFixed(3)})`;
       if (size < 1.05) {
         ctx.fillRect(P.x, P.y, size, size);
@@ -436,42 +469,67 @@
       }
     }
 
-    // Sun track
+    // 2. The Sun's track through space
     if (props.showSunTrack) {
-      const back = props.driftSpeed * props.trailYears * 1.1;
+      const back = props.driftSpeed * props.trailYears * 1.15;
       project(0, 0, 0);
       const hx = P.x, hy = P.y;
       project(-DIR.x * back, -DIR.y * back, -DIR.z * back);
       if (P.ok) {
         const grad = ctx.createLinearGradient(hx, hy, P.x, P.y);
         grad.addColorStop(0, `rgba(255,246,214,${k})`);
-        grad.addColorStop(0.45, `rgba(255,206,110,${0.55 * k})`);
+        grad.addColorStop(0.45, `rgba(255,206,110,${0.65 * k})`);
         grad.addColorStop(1, "rgba(255,180,80,0)");
         ctx.strokeStyle = grad;
         ctx.lineCap = "round";
         ctx.beginPath();
         ctx.moveTo(hx, hy);
         ctx.lineTo(P.x, P.y);
-        ctx.lineWidth = 11;
-        ctx.globalAlpha = 0.16;
+        ctx.lineWidth = 12;
+        ctx.globalAlpha = 0.18;
         ctx.stroke();
-        ctx.lineWidth = 4;
-        ctx.globalAlpha = 0.3;
+        ctx.lineWidth = 4.5;
+        ctx.globalAlpha = 0.35;
         ctx.stroke();
         ctx.globalAlpha = 1;
-        ctx.lineWidth = 1.8;
+        ctx.lineWidth = 2;
         ctx.stroke();
       }
     }
 
-    // Planetary helical wakes
+    // 3. Faint orbital guide rings
+    if (props.showOrbits) {
+      for (const el of elems) {
+        const [r, g, b] = el.rgb;
+        const steps = 140;
+        ctx.beginPath();
+        let started = false;
+        for (let q = 0; q <= steps; q++) {
+          const E = (q / steps) * TAU;
+          const M = E - el.e * Math.sin(E);
+          helio(el, M, props.compress);
+          project(R3.x, R3.y, R3.z);
+          if (!P.ok) { started = false; continue; }
+          if (!started) { ctx.moveTo(P.x, P.y); started = true; }
+          else ctx.lineTo(P.x, P.y);
+        }
+        ctx.strokeStyle = `rgba(${r},${g},${b},${0.06 * k})`;
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        ctx.strokeStyle = `rgba(${r},${g},${b},${0.35 * k})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    // 4. Planetary helical wakes
     const shots = [];
     for (const el of elems) {
       const [r, g, b] = el.rgb;
       const bright = (el.p.glow ?? 1) * k;
       const span = Math.min(props.trailYears, props.maxTurns * el.period);
       const turns = span / el.period;
-      const N = Math.max(48, Math.min(360, Math.ceil(turns * 46 * (1 + 2.2 * el.e)) + 48));
+      const N = Math.max(54, Math.min(380, Math.ceil(turns * 50 * (1 + 2.2 * el.e)) + 54));
 
       const xs = new Float64Array(N + 1);
       const ys = new Float64Array(N + 1);
@@ -503,15 +561,15 @@
 
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-      stroke(Math.floor(N * 0.72), N, 0.05 * bright, 6.5);
-      stroke(Math.floor(N * 0.86), N, 0.05 * bright, 3);
+      stroke(Math.floor(N * 0.70), N, 0.08 * bright, 7);
+      stroke(Math.floor(N * 0.85), N, 0.08 * bright, 3.5);
 
       ctx.lineCap = "butt";
-      ctx.lineWidth = 1.3;
+      ctx.lineWidth = 1.4;
       for (let q = 0; q < N; q++) {
         if (!okArr[q] || !okArr[q + 1]) continue;
         const f = (q + 1) / N;
-        const a = Math.pow(f, 2.6) * 0.95 * bright;
+        const a = Math.pow(f, 2.5) * 1.05 * bright;
         if (a < 0.005) continue;
         ctx.strokeStyle = `rgba(${r},${g},${b},${a.toFixed(3)})`;
         ctx.beginPath();
@@ -521,17 +579,18 @@
       }
     }
 
+    // 5. Planetary bodies (sorted depth)
     shots.sort((p, q) => q.depth - p.depth);
-    const sizeScale = Math.min(width, height) / 660;
+    const sizeScale = Math.min(width, height) / 640;
     const drawShot = (o) => {
-      const depth = Math.min(1.3, Math.max(0.5, o.s));
+      const depth = Math.min(1.4, Math.max(0.5, o.s));
       const size = o.el.p.size * depth * sizeScale;
       const bright = (o.el.p.glow ?? 1) * k;
-      const R = size * 3.3;
-      ctx.globalAlpha = Math.min(1, 0.9 * bright);
+      const R = size * 3.5;
+      ctx.globalAlpha = Math.min(1, 0.95 * bright);
       ctx.drawImage(glowSprite(o.el.p.color), o.x - R, o.y - R, R * 2, R * 2);
       ctx.globalAlpha = 1;
-      ctx.fillStyle = "rgba(255,255,255,0.95)";
+      ctx.fillStyle = "rgba(255,255,255,0.98)";
       ctx.beginPath();
       ctx.arc(o.x, o.y, size * 0.5, 0, TAU);
       ctx.fill();
@@ -548,17 +607,17 @@
   function tick(now) {
     if (!running) return;
     raf = requestAnimationFrame(tick);
-    if (!visible) { lastFrame = now; return; }
-    const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0;
+    const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0.016;
     lastFrame = now;
-    if (!reduced) {
-      years += dt / Math.max(0.1, props.yearSeconds);
-    }
+
+    // ACTIVE TIME UPDATES: Advance both planetary positions and camera auto-rotation
+    years += dt / Math.max(0.1, props.yearSeconds);
+    autoRotation += dt * 8.5; // Smooth continuous 8.5 deg/sec 3D orbit rotation!
+
     render(years);
   }
 
   window.addEventListener("resize", resize);
   resize();
-  render(years);
-  if (!reduced) raf = requestAnimationFrame(tick);
+  raf = requestAnimationFrame(tick);
 })();
