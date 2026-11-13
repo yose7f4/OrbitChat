@@ -516,11 +516,12 @@ input, textarea, button {
 .log-row {
   display: flex;
   flex-direction: column;
-  padding: 0.25rem 0.5rem;
+  padding: 0.3rem 0.65rem;
   border-radius: var(--radius-sm);
   position: relative;
-  transition: background-color 100ms;
+  transition: background-color 140ms ease, border-color 140ms ease, backdrop-filter 140ms ease, box-shadow 140ms ease;
   animation: logEnter 140ms ease-out;
+  border: 1px solid transparent;
 }
 
 @keyframes logEnter {
@@ -529,7 +530,11 @@ input, textarea, button {
 }
 
 .log-row:hover {
-  background-color: var(--surface);
+  background-color: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 /* Own Message: 2px accent edge on the left, NOT right alignment */
@@ -550,13 +555,13 @@ input, textarea, button {
   margin-bottom: 0.2rem;
 }
 
-/* Square Monogram Tile (No rainbow, desaturated tint/border) */
+/* Square Monogram Tile (Translucent glass style) */
 .monogram-tile {
   width: 20px;
   height: 20px;
   border-radius: var(--radius-xs);
-  background-color: var(--raised);
-  border: 1px solid var(--border-strong);
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: var(--text);
   font-family: var(--font-mono);
   font-size: 10.5px;
@@ -566,6 +571,8 @@ input, textarea, button {
   justify-content: center;
   flex-shrink: 0;
   text-transform: uppercase;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .log-username {
@@ -635,8 +642,8 @@ input, textarea, button {
 }
 
 .rx-pill {
-  background: var(--raised);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
   border-radius: var(--radius-xs);
   padding: 1px 5px;
@@ -646,11 +653,14 @@ input, textarea, button {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   transition: border-color 100ms, color 100ms, background 100ms;
 }
 
 .rx-pill:hover {
-  background: var(--hover);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
   color: var(--text);
 }
 
@@ -864,7 +874,9 @@ input, textarea, button {
 }
 
 .user-node:hover {
-  background-color: var(--hover);
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .user-presence-dot {
