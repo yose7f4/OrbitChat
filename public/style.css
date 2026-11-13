@@ -110,14 +110,14 @@ input, textarea, button {
   outline-offset: 1px;
 }
 
-/* Orbital Background Canvas */
-.orbital-bg-canvas {
+/* Black Hole WebGL Background Canvas */
+.blackhole-canvas {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
 }
 
